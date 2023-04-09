@@ -3,8 +3,6 @@ import pygame
 import sdl2
 import sdl2.ext
 pygame.init()
-onfloor = True
-
 # Set up the drawing window
 SCREEN_WIDTH = 500
 SCREEN_HEIGHT = 500
@@ -96,9 +94,9 @@ def update_screen(screen, game_objects):
         yvel *= -0.75
         if yvel >= -1 and yvel <= 0:
             yvel = 0
-        if yvel >= -1 and yvel <= 0:
-            o1.velocity = (0.99 * o1.velocity[0], o1.velocity[1])
-        o1.velocity = (o1.velocity[0], yvel)
+        if yvel >= -1 and yvel <= 1:
+            o1.velocity = (0.95 * o1.velocity[0], o1.velocity[1])
+            o1.velocity = (o1.velocity[0], yvel * 0.5)
         o1.location.top_y = SCREEN_HEIGHT - o1.hitbox.height
     if o1.location.left_x >= (SCREEN_WIDTH - o1.hitbox.width):
         o1.velocity = (-0.75 * o1.velocity[0], o1.velocity[1])
@@ -154,7 +152,6 @@ def update_screen(screen, game_objects):
 
 from enum import Enum
 
-
 class movementStates(Enum):
     STATIONARY = 0
     JUMPING = 1
@@ -172,10 +169,20 @@ def update_input(key, game_object):
             if key == "up":
                 state = movementStates.JUMPING
                 game_object.changeVelocity(0, -8)
+            if key == "left":
+                game_object.changeVelocity(-5,0)
+            if key == "right":
+                game_object.changeVelocity(5,0)
         case movementStates.JUMPING:
             if key == "up":
                 state = movementStates.DOUBLEJUMPING
                 game_object.changeVelocity(0,-5)
+            if key == "left":
+                game_object.changeVelocity(-5,0)
+            if key == "right":
+                game_object.changeVelocity(5,0)
+            if game_object.velocity[1] == 0.125:
+                state = movementStates.STATIONARY
         case movementStates.DOUBLEJUMPING:
             if key == "up":
                 pass
@@ -185,6 +192,8 @@ def update_input(key, game_object):
                 game_object.changeVelocity(-5,0)
             if key == "right":
                 game_object.changeVelocity(5,0)
+            if game_object.velocity[1] == 0.125:
+                state = movementStates.STATIONARY
     #jumping: in the air
     #doubleJumping: jumping while mid-air
     #running: on normal ground, player inputing controls
@@ -213,6 +222,14 @@ def test2():
                     key = "left"
                 elif event.key == pygame.K_RIGHT:
                     key = "right"
+                elif event.key == pygame.K_w:
+                    key = "up"
+                elif event.key == pygame.K_s:
+                    key = "down"
+                elif event.key == pygame.K_a:
+                    key = "left"
+                elif event.key == pygame.K_d:
+                    key = "right"
             if event.type == pygame.QUIT:
                 running = False
 
@@ -238,16 +255,14 @@ while running:
     # Fill the background with white
     screen.fill((255, 255, 255))
     if circle_position[1] >= (SCREEN_HEIGHT - circle_radius):
-        yVelocity *= -0.75
-        global onfloor
-        if yVelocity >= -1 and yVelocity <= 0:
-            onfloor = True
+        yVelocity *= -0.25
+        if yVelocity >= -1 and yVelocity <= 5:
             yVelocity = 0
-        else:
-            onfloor = False
+            state = movementStates.STATIONARY
         circle_position = (circle_position[0], SCREEN_HEIGHT - circle_radius - 1)
     if circle_position[0] >= (SCREEN_WIDTH - circle_radius):
         xVelocity *= -0.75
+        circle_position = (circle_position[0] + 1000, circle_position[1])
     if circle_position[0] <= (0 + circle_radius):
         xVelocity *= -0.75
 
