@@ -44,31 +44,17 @@ def test():
     result = o1.collidesWith(o2)
     print(result)
 def update_screen(screen, game_objects):
-    # if circle_position[1] >= (SCREEN_HEIGHT - circle_radius):
-    #     yVelocity *= -0.75
-    #     circle_position = (circle_position[0], circle_position[1] - circle_radius)
-    #     if yVelocity >= -1 and yVelocity <= 5:
-    #         yVelocity = 0
-    #         state = movementStates.STATIONARY
-    #     circle_position = (circle_position[0], SCREEN_HEIGHT - circle_radius - 1)
-    # if circle_position[0] >= (SCREEN_WIDTH - circle_radius):
-    #     xVelocity *= -0.75
-    #     circle_position = (circle_position[0] + 1000, circle_position[1])
-    # if circle_position[0] <= (0 + circle_radius):
-    #     xVelocity *= -0.75
-
     o1 = game_objects[0]
     o2 = game_objects[1]
     # Fill the background with white
     screen.fill((255, 255, 255))
     if o1.location.top_y + o1.hitbox.height >= (SCREEN_HEIGHT):
-        yvel = o1.velocity[1]
-        yvel *= -0.75
-        if yvel >= -1 and yvel <= 0:
-            yvel = 0
+        yvel = o1.velocity[1] * -0.75
+        xvel = o1.velocity[0] * 0.95
         if yvel >= -1 and yvel <= 1:
-            o1.velocity = (0.95 * o1.velocity[0], o1.velocity[1])
-            o1.velocity = (o1.velocity[0], yvel * -0.5)
+            yvel = 0
+
+        o1.velocity = (xvel, yvel)
         o1.location.top_y = SCREEN_HEIGHT - o1.hitbox.height
     if o1.location.left_x >= (SCREEN_WIDTH - o1.hitbox.width):
         o1.velocity = (-0.75 * o1.velocity[0], o1.velocity[1])
@@ -78,35 +64,7 @@ def update_screen(screen, game_objects):
     #(CollisionDetected, TopCollision, BottomCollision, LeftCollision, RightCollision)
 
     collision = o1.collidesWith(o2)
-    #print(collision)
 
-    situation1 = (True, False, True, False, True)
-    situation2 = (True, False, True, True, True)
-    situation3 = (True, False, True, True, False)
-    situation4 = (True, True, True, False, True)
-    #situation5 =
-    situation6 = (True, True, True, True, False)
-    situation7 = (True, True, False, False, True)
-    situation8 = (True, True, False, True, True)
-    situation9 = (True, True, False, True, False)
-#     # if collision == situation1:
-#     #     o1.velocity = (-1 * o1.velocity[0], -1 * o1.velocity[1])
-#     # if collision == situation2:
-#     #     o1.velocity = (o1.velocity[0], -1 * o1.velocity[1])
-#     # if collision == situation3:
-#     #     o1.velocity = (-1 * o1.velocity[0], -1 * o1.velocity[1])
-#     # if collision == situation4:
-#     #     o1.velocity = ( o1.velocity[0], -1 * o1.velocity[1])
-# #if collision == situation5:
-# #
-#     if collision == situation6:
-#         o1.velocity = (-1 * o1.velocity[0], o1.velocity[1])
-#     if collision == situation7:
-#         o1.velocity = (-1 * o1.velocity[0], -1 * o1.velocity[1])
-#     if collision == situation8:
-#         o1.velocity = (o1.velocity[0], -1 * o1.velocity[1])
-#     if collision == situation9:
-#         o1.velocity = (-1 * o1.velocity[0], -1 * o1.velocity[1])
     flipXVelocity = collision[0] and (collision[3] ^ collision[4])
     flipYVelocity = collision[0] and (collision[1] ^ collision[2])
     if flipXVelocity:
@@ -175,7 +133,7 @@ def update_input(key, game_object):
 
 def test2():
     width = 160
-    o1 = GameObject(location=Location(30, SCREEN_HEIGHT - 20), hitbox=Hitbox(10, 10), image=None, velocity=(0, 0))
+    o1 = GameObject(location=Location(30, SCREEN_HEIGHT - 10), hitbox=Hitbox(10, 10), image=None, velocity=(0, 0))
     o2 = GameObject(location=Location(400 - width, 300), hitbox=Hitbox(width, 20), image=None, velocity=(0, 0))
     game_objects = [o1, o2]
 
