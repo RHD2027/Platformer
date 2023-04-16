@@ -1,5 +1,6 @@
 import time
 import pygame
+from GameObject import *
 import sdl2
 import sdl2.ext
 pygame.init()
@@ -8,7 +9,7 @@ SCREEN_WIDTH = 500
 SCREEN_HEIGHT = 500
 screen = pygame.display.set_mode([SCREEN_WIDTH, SCREEN_HEIGHT])
 circle_position = (50, 400)
-circle_color = (0,255 , 10)
+
 circle_radius = 25
 refresh_rate = 60
 frame_time = 1/refresh_rate
@@ -23,49 +24,7 @@ class Hitbox:
     def __init__(self, width, height):
         self.width = width
         self.height = height
-class GameObject:
 
-    def __init__(self, location, hitbox, image, velocity):
-# Hitbox should track X and Y coordinates as well as height and width.
-# Hitbox is for the computer to track the object, the image is for the human playing to see that it is there.
-        self.location = location
-        self.hitbox = hitbox
-        self.image = image
-        self.velocity = velocity
-    def move(self):
-        (x,y) = (self.location.left_x, self.location.top_y)
-        (dx, dy) = self.velocity
-        self.location.left_x = x + dx
-        self.location.top_y = y + dy
-
-    def collidesWith(self, other):
-        object1BottomY = self.location.top_y + self.hitbox.height
-        object2BottomY = other.location.top_y + other.hitbox.height
-        object1RightX = self.location.left_x + self.hitbox.width
-        object2RightX = other.location.left_x + other.hitbox.width
-        # if object1.top_y <= object2BottomY or object1BottomY >= object2.top_y and object1.top_y <= object2BottomY or object1BottomY <= object2BottomY
-        BottomCollision = other.location.top_y <= object1BottomY and object1BottomY <= object2BottomY
-        TopCollision = other.location.top_y <= self.location.top_y and self.location.top_y <= object2BottomY
-        VerticalCollision = BottomCollision or TopCollision
-        LeftCollision = other.location.left_x <= self.location.left_x and self.location.left_x <= object2RightX
-        RightCollision = other.location.left_x <= object1RightX and object1RightX <= object2RightX
-        HorizontalCollision = LeftCollision or RightCollision
-        CollisionDetected = VerticalCollision and HorizontalCollision
-        return (CollisionDetected, TopCollision, BottomCollision, LeftCollision, RightCollision)
-
-    def draw(self, screen):
-        s = screen
-        cc = circle_color
-        l = self.location
-        r = pygame.Rect(l.left_x, l.top_y, self.hitbox.width, self.hitbox.height)
-        pygame.draw.rect(s, cc, r)
-    def changeVelocity(self, dx, dy):
-        self.velocity = (self.velocity[0] + dx, self.velocity[1] + dy)
-# Need a image as well as a hitbox as part of the class.
-
-# Need a location so the game can update properly.
-
-# Speed = Rate at which location changes/ Velocity = How far it travels in how much time.
 
 # Run until the user asks to quit
 
@@ -85,6 +44,19 @@ def test():
     result = o1.collidesWith(o2)
     print(result)
 def update_screen(screen, game_objects):
+    # if circle_position[1] >= (SCREEN_HEIGHT - circle_radius):
+    #     yVelocity *= -0.75
+    #     circle_position = (circle_position[0], circle_position[1] - circle_radius)
+    #     if yVelocity >= -1 and yVelocity <= 5:
+    #         yVelocity = 0
+    #         state = movementStates.STATIONARY
+    #     circle_position = (circle_position[0], SCREEN_HEIGHT - circle_radius - 1)
+    # if circle_position[0] >= (SCREEN_WIDTH - circle_radius):
+    #     xVelocity *= -0.75
+    #     circle_position = (circle_position[0] + 1000, circle_position[1])
+    # if circle_position[0] <= (0 + circle_radius):
+    #     xVelocity *= -0.75
+
     o1 = game_objects[0]
     o2 = game_objects[1]
     # Fill the background with white
@@ -96,7 +68,7 @@ def update_screen(screen, game_objects):
             yvel = 0
         if yvel >= -1 and yvel <= 1:
             o1.velocity = (0.95 * o1.velocity[0], o1.velocity[1])
-            o1.velocity = (o1.velocity[0], yvel * 0.5)
+            o1.velocity = (o1.velocity[0], yvel * -0.5)
         o1.location.top_y = SCREEN_HEIGHT - o1.hitbox.height
     if o1.location.left_x >= (SCREEN_WIDTH - o1.hitbox.width):
         o1.velocity = (-0.75 * o1.velocity[0], o1.velocity[1])
@@ -203,7 +175,7 @@ def update_input(key, game_object):
 
 def test2():
     width = 160
-    o1 = GameObject(location=Location(30, SCREEN_HEIGHT - 10), hitbox=Hitbox(10, 10), image=None, velocity=(0, 0))
+    o1 = GameObject(location=Location(30, SCREEN_HEIGHT - 20), hitbox=Hitbox(10, 10), image=None, velocity=(0, 0))
     o2 = GameObject(location=Location(400 - width, 300), hitbox=Hitbox(width, 20), image=None, velocity=(0, 0))
     game_objects = [o1, o2]
 
@@ -243,40 +215,3 @@ def test2():
 test2()
 #test()
 #exit()
-
-running = True
-while running:
-#	current_time = time.getTime
-    # Did the user click the window close button?
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-
-    # Fill the background with white
-    screen.fill((255, 255, 255))
-    if circle_position[1] >= (SCREEN_HEIGHT - circle_radius):
-        yVelocity *= -0.25
-        if yVelocity >= -1 and yVelocity <= 5:
-            yVelocity = 0
-            state = movementStates.STATIONARY
-        circle_position = (circle_position[0], SCREEN_HEIGHT - circle_radius - 1)
-    if circle_position[0] >= (SCREEN_WIDTH - circle_radius):
-        xVelocity *= -0.75
-        circle_position = (circle_position[0] + 1000, circle_position[1])
-    if circle_position[0] <= (0 + circle_radius):
-        xVelocity *= -0.75
-
-#    if circle_position[1]
-    circle_position = (circle_position[0] + xVelocity, circle_position[1] + yVelocity)
-    yVelocity += gravity
-    # Draw a solid green circle in the center
-    pygame.draw.circle(screen, circle_color, circle_position, circle_radius)
-    pygame.draw.rect(screen, circle_color, pygame.Rect(400, 300, 50, 20), 0)
-    # Flip the display
-    pygame.display.flip()
-    time.sleep(frame_time)
-
-# Done! Time to quit.
-pygame.quit()
-
-
