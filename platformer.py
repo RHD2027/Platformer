@@ -7,13 +7,13 @@ pygame.init()
 # Set up the drawing window
 SCREEN_WIDTH = 500
 SCREEN_HEIGHT = 500
+dashing = False
 screen = pygame.display.set_mode([SCREEN_WIDTH, SCREEN_HEIGHT])
 circle_position = (50, 400)
-
 circle_radius = 25
 refresh_rate = 60
 frame_time = 1/refresh_rate
-gravity = 1/8
+
 yVelocity = -10
 xVelocity = 2
 class Location:
@@ -28,38 +28,43 @@ class Hitbox:
 
 # Run until the user asks to quit
 
-b = GameObject(location = Location(400, 200), hitbox = Hitbox(circle_radius * 2, circle_radius * 2), image = None, velocity = (2, -10))
-p = GameObject(location = Location(400, 300), hitbox = Hitbox(50, 20), image = None, velocity = (0, 0))
-def test():
-    o1 = GameObject(location = Location(400, 200), hitbox = Hitbox(10, 10), image = None, velocity = (2, -10))
-    o2 = GameObject(location = Location(400, 300), hitbox = Hitbox(10, 10), image = None, velocity = (0, 0))
-    result = o1.collidesWith(o2)
-    print(result)
-    o1 = GameObject(location=Location(400, 290), hitbox=Hitbox(10, 10), image=None, velocity=(2, -10))
-    o2 = GameObject(location=Location(400, 300), hitbox=Hitbox(10, 10), image=None, velocity=(0, 0))
-    result = o1.collidesWith(o2)
-    print(result)
-    o1 = GameObject(location=Location(390, 300), hitbox=Hitbox(10, 10), image=None, velocity=(2, -10))
-    o2 = GameObject(location=Location(400, 300), hitbox=Hitbox(10, 10), image=None, velocity=(0, 0))
-    result = o1.collidesWith(o2)
-    print(result)
+# b = GameObject(location = Location(400, 200), hitbox = Hitbox(circle_radius * 2, circle_radius * 2), image = None, velocity = (2, -10))
+# p = GameObject(location = Location(400, 300), hitbox = Hitbox(50, 20), image = None, velocity = (0, 0))
+# def test():
+    # o1 = GameObject(location = Location(400, 200), hitbox = Hitbox(10, 10), image = None, velocity = (2, -10))
+    # o2 = GameObject(location = Location(400, 300), hitbox = Hitbox(10, 10), image = None, velocity = (0, 0))
+    # result = o1.collidesWith(o2)
+    # print(result)
+    # o1 = GameObject(location=Location(400, 290), hitbox=Hitbox(10, 10), image=None, velocity=(2, -10))
+    # o2 = GameObject(location=Location(400, 300), hitbox=Hitbox(10, 10), image=None, velocity=(0, 0))
+    # result = o1.collidesWith(o2)
+    # print(result)
+    # o1 = GameObject(location=Location(390, 300), hitbox=Hitbox(10, 10), image=None, velocity=(2, -10))
+    # o2 = GameObject(location=Location(400, 300), hitbox=Hitbox(10, 10), image=None, velocity=(0, 0))
+    # result = o1.collidesWith(o2)
+    # print(result)
 def update_screen(screen, game_objects):
     o1 = game_objects[0]
     o2 = game_objects[1]
+    badGuy = game_objects[2]
+    def keepInBounds(o1, screen_width, screen_height):
+        if o1.location.top_y + o1.hitbox.height >= (SCREEN_HEIGHT):
+            yvel = o1.velocity[1] * -0.75
+            xvel = o1.velocity[0] * 0.95
+            if yvel >= -1 and yvel <= 1:
+                yvel = 0
+
+            o1.velocity = (xvel, yvel)
+            o1.location.top_y = SCREEN_HEIGHT - o1.hitbox.height
+        if o1.location.left_x >= (SCREEN_WIDTH - o1.hitbox.width):
+            o1.velocity = (-0.75 * o1.velocity[0], o1.velocity[1])
+            o1.location.left_x = SCREEN_WIDTH - o1.hitbox.width
+        if o1.location.left_x <= (0 + o1.hitbox.width):
+            o1.velocity = (-0.75 * o1.velocity[0], o1.velocity[1])
+            o1.location.left_x = o1.hitbox.width
     # Fill the background with white
     screen.fill((255, 255, 255))
-    if o1.location.top_y + o1.hitbox.height >= (SCREEN_HEIGHT):
-        yvel = o1.velocity[1] * -0.75
-        xvel = o1.velocity[0] * 0.95
-        if yvel >= -1 and yvel <= 1:
-            yvel = 0
 
-        o1.velocity = (xvel, yvel)
-        o1.location.top_y = SCREEN_HEIGHT - o1.hitbox.height
-    if o1.location.left_x >= (SCREEN_WIDTH - o1.hitbox.width):
-        o1.velocity = (-0.75 * o1.velocity[0], o1.velocity[1])
-    if o1.location.left_x <= (0 + o1.hitbox.width):
-        o1.velocity = (-0.75 * o1.velocity[0], o1.velocity[1])
 
     #(CollisionDetected, TopCollision, BottomCollision, LeftCollision, RightCollision)
 
@@ -73,9 +78,15 @@ def update_screen(screen, game_objects):
         o1.velocity = (o1.velocity[0], -1 * o1.velocity[1])
 
 
-    o1.move()
-    o1.velocity= (o1.velocity[0], o1.velocity[1] + gravity)
+    # o1.velocity= (o1.velocity[0], o1.velocity[1] + gravity)
+    # badGuy.velocity = (badGuy.velocity[0], badGuy.velocity[1] + gravity)
+    # (dx, dy) = badGuy.velocity
+    # badGuy.move(dx, dy)
     for go in game_objects:
+        go.applyGravity()
+        (dx, dy) = go.velocity
+        go.move(dx, dy)
+        keepInBounds(go, SCREEN_WIDTH, SCREEN_HEIGHT)
         go.draw(screen)
     pygame.display.flip()
 
@@ -93,9 +104,11 @@ class movementStates(Enum):
 state = movementStates.STATIONARY
 def update_input(key, game_object):
     global state
+    global dashing
     print(state)
     match state:
         case movementStates.STATIONARY:
+            dashing = False
             if key == "up":
                 state = movementStates.JUMPING
                 game_object.changeVelocity(0, -8)
@@ -111,8 +124,9 @@ def update_input(key, game_object):
                 game_object.changeVelocity(-5,0)
             if key == "right":
                 game_object.changeVelocity(5,0)
-            if game_object.velocity[1] == 0.125:
+            if game_object.velocity[1] == 0:
                 state = movementStates.STATIONARY
+
         case movementStates.DOUBLEJUMPING:
             if key == "up":
                 pass
@@ -133,9 +147,13 @@ def update_input(key, game_object):
 
 def test2():
     width = 160
-    o1 = GameObject(location=Location(30, SCREEN_HEIGHT - 10), hitbox=Hitbox(10, 10), image=None, velocity=(0, 0))
-    o2 = GameObject(location=Location(400 - width, 300), hitbox=Hitbox(width, 20), image=None, velocity=(0, 0))
-    game_objects = [o1, o2]
+    player = GameObject(location=Location(30, SCREEN_HEIGHT - 10), hitbox=Hitbox(10, 10), image=None, velocity=(0, 0),color=(0,255,0), moveable = True)
+    platform = GameObject(location=Location(400 - width, 300), hitbox=Hitbox(width, 20), image=None, velocity=(0, 0),color=(0,0,255), moveable=False)
+    bg1 = GameObject(location=Location(400 - 10, 300-10), hitbox=Hitbox(10,10), image=None, velocity=(-5,0),color=(255,0,0), moveable=True)
+    bg2 = GameObject(location=Location(400 - 40, 300-10), hitbox=Hitbox(10,10), image=None, velocity=(0,-5),color=(255,0,100), moveable=True)
+    bg3 = GameObject(location=Location(400 - 80, 300-10), hitbox=Hitbox(10,10), image=None, velocity=(5,0),color=(255,50,0), moveable=True)
+    game_objects = [player, platform, bg1, bg2, bg3]
+    game_enemies = [bg1, bg2, bg3]
 
     running = True
     while running:
@@ -160,10 +178,29 @@ def test2():
                     key = "left"
                 elif event.key == pygame.K_d:
                     key = "right"
+                elif event.key == pygame.K_z:
+                    # key = "dash"
+                    global dashing
+                    if dashing == False:
+                        dashing = True
+                        # o1.velocity = (o1.velocity[0] * 1.5,o1.velocity[1])
+                        (dx, dy) = o1.velocity
+                        dx = -1 if dx < 0 else 1
+                        o1.move(dx * 35, dy)
             if event.type == pygame.QUIT:
                 running = False
 
-        update_input(key, o1)
+        def aiMove(enemy, victim):
+            key = ""
+            if enemy.location.left_x < victim.location.left_x:
+                key = "right"
+            elif enemy.location.left_x > victim.location.left_x:
+                key = "left"
+            update_input(key,enemy)
+        for enemy in game_enemies:
+            aiMove(enemy,player)
+
+        update_input(key, player)
         update_screen(screen, game_objects)
         time.sleep(frame_time)
 
