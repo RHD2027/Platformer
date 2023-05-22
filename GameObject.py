@@ -1,5 +1,6 @@
 import time
 import pygame
+from movementStates import movementStates
 circle_color = (0,255 , 10)
 class GameObject:
 
@@ -12,6 +13,7 @@ class GameObject:
         self.velocity = velocity
         self.color = color
         self.moveable = moveable
+        self.state = movementStates.STATIONARY
     def move(self, dx, dy):
         (x,y) = (self.location.left_x, self.location.top_y)
         # (dx, dy) = self.velocity

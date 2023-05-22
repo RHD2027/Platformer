@@ -13,6 +13,7 @@ circle_position = (50, 400)
 circle_radius = 25
 refresh_rate = 60
 frame_time = 1/refresh_rate
+enemyMovementCounter = 0
 
 yVelocity = -10
 xVelocity = 2
@@ -43,13 +44,13 @@ class Hitbox:
     # o2 = GameObject(location=Location(400, 300), hitbox=Hitbox(10, 10), image=None, velocity=(0, 0))
     # result = o1.collidesWith(o2)
     # print(result)
-def update_screen(screen, game_objects):
+def update_world(screen, game_objects, key):
     o1 = game_objects[0]
     o2 = game_objects[1]
     badGuy = game_objects[2]
     def keepInBounds(o1, screen_width, screen_height):
         if o1.location.top_y + o1.hitbox.height >= (SCREEN_HEIGHT):
-            yvel = o1.velocity[1] * -0.75
+            yvel = o1.velocity[1] * -0.1
             xvel = o1.velocity[0] * 0.95
             if yvel >= -1 and yvel <= 1:
                 yvel = 0
@@ -62,13 +63,14 @@ def update_screen(screen, game_objects):
         if o1.location.left_x <= (0 + o1.hitbox.width):
             o1.velocity = (-0.75 * o1.velocity[0], o1.velocity[1])
             o1.location.left_x = o1.hitbox.width
-    # Fill the background with white
-    screen.fill((255, 255, 255))
+
 
 
     #(CollisionDetected, TopCollision, BottomCollision, LeftCollision, RightCollision)
 
     collision = o1.collidesWith(o2)
+
+
 
     flipXVelocity = collision[0] and (collision[3] ^ collision[4])
     flipYVelocity = collision[0] and (collision[1] ^ collision[2])
@@ -77,6 +79,8 @@ def update_screen(screen, game_objects):
     if flipYVelocity:
         o1.velocity = (o1.velocity[0], -1 * o1.velocity[1])
 
+        #Need to fix interaction generating collision with floor
+    update_movementState(key, o1, collision)
 
     # o1.velocity= (o1.velocity[0], o1.velocity[1] + gravity)
     # badGuy.velocity = (badGuy.velocity[0], badGuy.velocity[1] + gravity)
@@ -87,45 +91,45 @@ def update_screen(screen, game_objects):
         (dx, dy) = go.velocity
         go.move(dx, dy)
         keepInBounds(go, SCREEN_WIDTH, SCREEN_HEIGHT)
+
+
+    # --------------------------------
+
+def update_screen(screen, game_objects):
+    # Fill the background with white
+    screen.fill((255, 255, 255))
+    for go in game_objects:
         go.draw(screen)
     pygame.display.flip()
 
+from movementStates import movementStates
 
-from enum import Enum
 
-class movementStates(Enum):
-    STATIONARY = 0
-    JUMPING = 1
-    DOUBLEJUMPING = 2
-    RUNNING = 3
-    SLIDING = 4
-    SWIMMING = 5
-
-state = movementStates.STATIONARY
-def update_input(key, game_object):
-    global state
+def update_movementState(key, game_object, collision):
     global dashing
-    print(state)
-    match state:
+    match game_object.state:
         case movementStates.STATIONARY:
             dashing = False
             if key == "up":
-                state = movementStates.JUMPING
+                game_object.state = movementStates.JUMPING
                 game_object.changeVelocity(0, -8)
             if key == "left":
                 game_object.changeVelocity(-5,0)
             if key == "right":
                 game_object.changeVelocity(5,0)
+
         case movementStates.JUMPING:
             if key == "up":
-                state = movementStates.DOUBLEJUMPING
+                game_object.state = movementStates.DOUBLEJUMPING
                 game_object.changeVelocity(0,-5)
             if key == "left":
                 game_object.changeVelocity(-5,0)
             if key == "right":
                 game_object.changeVelocity(5,0)
-            if game_object.velocity[1] == 0:
-                state = movementStates.STATIONARY
+            # if game_object.location.top_y > SCREEN_HEIGHT - 20:
+            #     game_object.state = movementStates.STATIONARY
+            if collision[0] == True and collision[2] == True:
+                game_object.state = movementStates.STATIONARY
 
         case movementStates.DOUBLEJUMPING:
             if key == "up":
@@ -136,14 +140,52 @@ def update_input(key, game_object):
                 game_object.changeVelocity(-5,0)
             if key == "right":
                 game_object.changeVelocity(5,0)
-            if game_object.velocity[1] == 0.125:
-                state = movementStates.STATIONARY
+            # if game_object.location.top_y > SCREEN_HEIGHT - 20:
+            #     game_object.state = movementStates.STATIONARY
+            if collision[0] == True and collision[2] == True:
+                game_object.state = movementStates.STATIONARY
     #jumping: in the air
     #doubleJumping: jumping while mid-air
     #running: on normal ground, player inputing controls
     #sliding: on slippery/special ground, player not giving input
     #swimming: in liquid
     #stationary: on ground, no inputs
+# estate = movementStates.ESTATIONARY
+# def keyMove(key, game_object):
+#     global estate
+#     global dashing
+#     # print(estate)
+#     match estate:
+#         case movementStates.ESTATIONARY:
+#             dashing = False
+#             if key == "up":
+#                 estate = movementStates.EJUMPING
+#                 game_object.changeVelocity(0, -0.5)
+#             if key == "left":
+#                 game_object.changeVelocity(-1,0)
+#             if key == "right":
+#                 game_object.changeVelocity(1,0)
+#         case movementStates.EJUMPING:
+#             if key == "up":
+#                 estate = movementStates.EDOUBLEJUMPING
+#                 game_object.changeVelocity(0,-0.5)
+#             if key == "left":
+#                 game_object.changeVelocity(-1,0)
+#             if key == "right":
+#                 game_object.changeVelocity(1,0)
+#             if game_object.location.top_y > SCREEN_HEIGHT - 15:
+#                 estate = movementStates.ESTATIONARY
+#         case movementStates.EDOUBLEJUMPING:
+#             if key == "up":
+#                 pass
+#             if key == "down":
+#                 pass
+#             if key == "left":
+#                 game_object.changeVelocity(-2.5, 0)
+#             if key == "right":
+#                 game_object.changeVelocity(2.5, 0)
+#             if game_object.location.top_y > SCREEN_HEIGHT - 15:
+#                 estate = movementStates.ESTATIONARY
 
 def test2():
     width = 160
@@ -157,6 +199,8 @@ def test2():
 
     running = True
     while running:
+
+        print(player.state)
         key = "none"
         #	current_time = time.getTime
         # Did the user click the window close button?
@@ -180,7 +224,7 @@ def test2():
                     key = "right"
                 elif event.key == pygame.K_z:
                     # key = "dash"
-                    global dashing
+                    global dashing, timer
                     if dashing == False:
                         dashing = True
                         # o1.velocity = (o1.velocity[0] * 1.5,o1.velocity[1])
@@ -189,18 +233,27 @@ def test2():
                         o1.move(dx * 35, dy)
             if event.type == pygame.QUIT:
                 running = False
-
         def aiMove(enemy, victim):
             key = ""
-            if enemy.location.left_x < victim.location.left_x:
+            if enemy.location.left_x < victim.location.left_x - 20:
                 key = "right"
-            elif enemy.location.left_x > victim.location.left_x:
+            elif enemy.location.left_x > victim.location.left_x + 20:
                 key = "left"
-            update_input(key,enemy)
-        for enemy in game_enemies:
-            aiMove(enemy,player)
+            else:
+                key = "none"
+            if enemy.location.top_y > victim.location.top_y + 20:
+                key = "up"
+                                                    # Fix This later
+            update_movementState(key,enemy, (False, False, False, False, False))
 
-        update_input(key, player)
+        global enemyMovementCounter
+        enemyMovementCounter += 1
+        if enemyMovementCounter >= 20:
+            for enemy in game_enemies:
+                    aiMove(enemy,player)
+            enemyMovementCounter = 0
+
+        update_world(screen, game_objects, key)
         update_screen(screen, game_objects)
         time.sleep(frame_time)
 
