@@ -44,7 +44,7 @@ class Hitbox:
     # o2 = GameObject(location=Location(400, 300), hitbox=Hitbox(10, 10), image=None, velocity=(0, 0))
     # result = o1.collidesWith(o2)
     # print(result)
-def update_world(screen, game_objects, key):
+def update_world(screen, game_objects, key, static_objects, dynamic_objects, game_enemies):
     o1 = game_objects[0]
     o2 = game_objects[1]
     badGuy = game_objects[2]
@@ -66,21 +66,31 @@ def update_world(screen, game_objects, key):
 
 
 
+            do.velocity = (do.velocity[0], -1 * do.velocity[1])
     #(CollisionDetected, TopCollision, BottomCollision, LeftCollision, RightCollision)
-
-    collision = o1.collidesWith(o2)
-
-
-
-    flipXVelocity = collision[0] and (collision[3] ^ collision[4])
-    flipYVelocity = collision[0] and (collision[1] ^ collision[2])
-    if flipXVelocity:
-        o1.velocity = (-1 * o1.velocity[0], o1.velocity[1])
-    if flipYVelocity:
-        o1.velocity = (o1.velocity[0], -1 * o1.velocity[1])
+    for do in dynamic_objects:
+        for so in static_objects:
+            collision = do.collidesWith(so)
+            flipXVelocity1 = collision[0] and collision[3]
+            flipXVelocity2 = collision[0] and collision[4]
+            flipYVelocity1 = collision[0] and collision[1]
+            flipYVelocity2 = collision[0] and collision[2]
+            if flipXVelocity1:
+                do.velocity = (-1 * do.velocity[0], do.velocity[1])
+                do.location.left_x = so.location.left_x + so.hitbox.width
+            if flipXVelocity2:
+                do.velocity = (-1 * do.velocity[0], do.velocity[1])
+                do.location.left_x = so.location.left_x - do.hitbox.width
+            if flipYVelocity1:
+                do.velocity = (do.velocity[0], -1 * do.velocity[1])
+                do.location.top_y = so.location.top_y + so.hitbox.height
+            if flipYVelocity2:
+                do.velocity = (do.velocity[0], -1 * do.velocity[1])
+                do.location.top_y = so.location.top_y - do.hitbox.height
+            if do not in game_enemies:
+                update_movementState(key, do, collision)
 
         #Need to fix interaction generating collision with floor
-    update_movementState(key, o1, collision)
 
     # o1.velocity= (o1.velocity[0], o1.velocity[1] + gravity)
     # badGuy.velocity = (badGuy.velocity[0], badGuy.velocity[1] + gravity)
@@ -90,14 +100,15 @@ def update_world(screen, game_objects, key):
         go.applyGravity()
         (dx, dy) = go.velocity
         go.move(dx, dy)
-        keepInBounds(go, SCREEN_WIDTH, SCREEN_HEIGHT)
+        if go.moveable:
+            keepInBounds(go, SCREEN_WIDTH, SCREEN_HEIGHT)
 
 
     # --------------------------------
 
 def update_screen(screen, game_objects):
-    # Fill the background with white
-    screen.fill((255, 255, 255))
+    # Fill the background with sky
+    screen.fill((80, 153, 217))
     for go in game_objects:
         go.draw(screen)
     pygame.display.flip()
@@ -189,18 +200,23 @@ def update_movementState(key, game_object, collision):
 
 def test2():
     width = 160
-    player = GameObject(location=Location(30, SCREEN_HEIGHT - 10), hitbox=Hitbox(10, 10), image=None, velocity=(0, 0),color=(0,255,0), moveable = True)
+    player = GameObject(location=Location(360, SCREEN_HEIGHT - 340), hitbox=Hitbox(10, 10), image=None, velocity=(0, 10),color=(0,255,0), moveable = True)
     platform = GameObject(location=Location(400 - width, 300), hitbox=Hitbox(width, 20), image=None, velocity=(0, 0),color=(0,0,255), moveable=False)
     bg1 = GameObject(location=Location(400 - 10, 300-10), hitbox=Hitbox(10,10), image=None, velocity=(-5,0),color=(255,0,0), moveable=True)
     bg2 = GameObject(location=Location(400 - 40, 300-10), hitbox=Hitbox(10,10), image=None, velocity=(0,-5),color=(255,0,100), moveable=True)
     bg3 = GameObject(location=Location(400 - 80, 300-10), hitbox=Hitbox(10,10), image=None, velocity=(5,0),color=(255,50,0), moveable=True)
-    game_objects = [player, platform, bg1, bg2, bg3]
+    ground = GameObject(location=Location(0, SCREEN_HEIGHT - 20), hitbox=Hitbox(SCREEN_WIDTH, 20), image=None, velocity=(0, 0),color=(86, 173, 85), moveable=False)
+
+    dynamic_objects = [player, bg1, bg2, bg3]
+    static_objects = [platform, ground]
+    game_objects = dynamic_objects + static_objects
     game_enemies = [bg1, bg2, bg3]
 
     running = True
     while running:
 
         print(player.state)
+        print(f"{player.prevlocation.left_x}, {player.prevlocation.top_y}, {player.location.left_x}, {player.location.top_y}")
         key = "none"
         #	current_time = time.getTime
         # Did the user click the window close button?
@@ -253,7 +269,7 @@ def test2():
                     aiMove(enemy,player)
             enemyMovementCounter = 0
 
-        update_world(screen, game_objects, key)
+        update_world(screen, game_objects, key, static_objects, dynamic_objects, game_enemies)
         update_screen(screen, game_objects)
         time.sleep(frame_time)
 

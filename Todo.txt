@@ -1,0 +1,54 @@
+Collision detection
+A player
+Scrolling background
+Enemies
+	Moving enemies
+	Stationary enemies
+	Projectile enemies
+Items/Coins
+	Used as a way to protect yourself
+	Certain amount required to win
+		Unlock level areas
+	After a certain point you can get an extra life
+	Used to buy powerups
+Levels are linear, meaning that once you complete one level you go to the next, and to get back you must run to the right to the previous level, and then run all the way through.
+Save system
+	Checkpoints
+	End of level
+Reasons to revisit a level
+	To go back to a shop
+	Secret areas/hidden parts
+	New/secret modes after game is played
+Movement system
+	Gravity
+	Speed system
+	Jumping
+	Difference between running/walking
+	Duck/Crouch
+	Dash feature
+		Stamina and dash cooldown and once stamins runs out, you can't dash and running is disabled. 
+		Food regenerates stamina, and stamina regenerates slowly over time.
+Use/Interact button to interact with objects or areas.
+NPCs that could talk to the player and give hints about things in the game
+	NPCs could say random text as well
+Combat mechanic
+	Attack button
+	Powerups could increase attack range/power
+	There could be a block mechanic where you can stop/reflect attacks
+Health mechanic
+	You have lives and when you get hit you lose one, and when you lose all of them you restart the level.
+	Immunity frames to prevent instant death
+Biomes/Regions
+	Grassland/Plains
+		Flat land (Tutorial)
+		Normal
+	Swamp
+	Underwater
+		Shallow water
+		Deep water
+	Rainforest
+		Rainy area
+		Normal area
+	Corrupted jungle
+		Corrupted jungle canopy/treetops
+Plotline

@@ -1,4 +1,5 @@
 import time
+import copy
 import pygame
 from movementStates import movementStates
 circle_color = (0,255 , 10)
@@ -14,7 +15,9 @@ class GameObject:
         self.color = color
         self.moveable = moveable
         self.state = movementStates.STATIONARY
+        self.prevlocation = location
     def move(self, dx, dy):
+        self.prevlocation = copy.deepcopy(self.location)
         (x,y) = (self.location.left_x, self.location.top_y)
         # (dx, dy) = self.velocity
         self.location.left_x = x + dx
@@ -45,7 +48,8 @@ class GameObject:
         self.velocity = (self.velocity[0] + dx, self.velocity[1] + dy)
 
     def applyGravity(self):
-        gravity = 1 / 8
+        # gravity is 1/8
+        gravity = 0
         if self.moveable == True:
             self.changeVelocity(0,gravity)
 # Need a image as well as a hitbox as part of the class.
