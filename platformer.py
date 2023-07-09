@@ -45,9 +45,9 @@ class Hitbox:
     # result = o1.collidesWith(o2)
     # print(result)
 def update_world(screen, game_objects, key, static_objects, dynamic_objects, game_enemies):
-    o1 = game_objects[0]
-    o2 = game_objects[1]
-    badGuy = game_objects[2]
+    # o1 = dynamic_objects[0]
+    # o2 = game_objects[1]
+    # badGuy = game_objects[2]
     def keepInBounds(o1, screen_width, screen_height):
         if o1.location.top_y + o1.hitbox.height >= (SCREEN_HEIGHT):
             yvel = o1.velocity[1] * -0.1
@@ -70,20 +70,29 @@ def update_world(screen, game_objects, key, static_objects, dynamic_objects, gam
     #(CollisionDetected, TopCollision, BottomCollision, LeftCollision, RightCollision)
     for do in dynamic_objects:
         for so in static_objects:
+            NO_COLLISION = 0
+            VERTICAL_COLLISION = 1
+            HORIZONTAL_COLLISION = 2
             collision = do.collidesWith(so)
-            flipXVelocity1 = collision[0] and collision[3]
-            flipXVelocity2 = collision[0] and collision[4]
-            flipYVelocity1 = collision[0] and collision[1]
-            flipYVelocity2 = collision[0] and collision[2]
-            if flipXVelocity1:
+            flipXVelocity1 = collision == HORIZONTAL_COLLISION
+            flipXVelocity2 = False
+            flipYVelocity1 = collision == VERTICAL_COLLISION
+            flipYVelocity2 = False
+            if flipXVelocity1 == True:
                 do.velocity = (-1 * do.velocity[0], do.velocity[1])
                 do.location.left_x = so.location.left_x + so.hitbox.width
-            if flipXVelocity2:
+            if flipXVelocity2 == True:
                 do.velocity = (-1 * do.velocity[0], do.velocity[1])
                 do.location.left_x = so.location.left_x - do.hitbox.width
             if flipYVelocity1:
-                do.velocity = (do.velocity[0], -1 * do.velocity[1])
-                do.location.top_y = so.location.top_y + so.hitbox.height
+                if do.velocity[1] > 0:
+                    do.location.top_y = so.location.top_y - do.hitbox.height
+                elif do.velocity[1] < 0:
+                    do.location.top_y = so.location.top_y + so.hitbox.height
+                else:
+                    pass
+                do.velocity = (do.velocity[0], -0.1 * do.velocity[1])
+
             if flipYVelocity2:
                 do.velocity = (do.velocity[0], -1 * do.velocity[1])
                 do.location.top_y = so.location.top_y - do.hitbox.height
@@ -139,8 +148,8 @@ def update_movementState(key, game_object, collision):
                 game_object.changeVelocity(5,0)
             # if game_object.location.top_y > SCREEN_HEIGHT - 20:
             #     game_object.state = movementStates.STATIONARY
-            if collision[0] == True and collision[2] == True:
-                game_object.state = movementStates.STATIONARY
+            # if collision[0] == True and collision[2] == True:
+            #     game_object.state = movementStates.STATIONARY
 
         case movementStates.DOUBLEJUMPING:
             if key == "up":
@@ -153,8 +162,8 @@ def update_movementState(key, game_object, collision):
                 game_object.changeVelocity(5,0)
             # if game_object.location.top_y > SCREEN_HEIGHT - 20:
             #     game_object.state = movementStates.STATIONARY
-            if collision[0] == True and collision[2] == True:
-                game_object.state = movementStates.STATIONARY
+            # if collision[0] == True and collision[2] == True:
+            #     game_object.state = movementStates.STATIONARY
     #jumping: in the air
     #doubleJumping: jumping while mid-air
     #running: on normal ground, player inputing controls
@@ -200,7 +209,7 @@ def update_movementState(key, game_object, collision):
 
 def test2():
     width = 160
-    player = GameObject(location=Location(360, SCREEN_HEIGHT - 340), hitbox=Hitbox(10, 10), image=None, velocity=(0, 10),color=(0,255,0), moveable = True)
+    player = GameObject(location=Location(360, 300 - 10 - 2), hitbox=Hitbox(10, 10), image=None, velocity=(0, 10),color=(0,255,0), moveable = True)
     platform = GameObject(location=Location(400 - width, 300), hitbox=Hitbox(width, 20), image=None, velocity=(0, 0),color=(0,0,255), moveable=False)
     bg1 = GameObject(location=Location(400 - 10, 300-10), hitbox=Hitbox(10,10), image=None, velocity=(-5,0),color=(255,0,0), moveable=True)
     bg2 = GameObject(location=Location(400 - 40, 300-10), hitbox=Hitbox(10,10), image=None, velocity=(0,-5),color=(255,0,100), moveable=True)
@@ -209,6 +218,8 @@ def test2():
 
     dynamic_objects = [player, bg1, bg2, bg3]
     static_objects = [platform, ground]
+    # dynamic_objects = [player]
+    # static_objects = [platform]
     game_objects = dynamic_objects + static_objects
     game_enemies = [bg1, bg2, bg3]
 
