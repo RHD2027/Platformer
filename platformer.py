@@ -78,10 +78,15 @@ def update_world(screen, game_objects, key, static_objects, dynamic_objects, gam
             flipXVelocity2 = False
             flipYVelocity1 = collision == VERTICAL_COLLISION
             flipYVelocity2 = False
-            if flipXVelocity1 == True:
+            if flipXVelocity1:
+                if do.velocity[0] > 0:
+                    do.location.left_x = so.location.left_x - do.hitbox.width
+                elif do.velocity[0] < 0:
+                    do.location.left_x = so.location.left_x + so.hitbox.width
+                else:
+                    pass
                 do.velocity = (-1 * do.velocity[0], do.velocity[1])
-                do.location.left_x = so.location.left_x + so.hitbox.width
-            if flipXVelocity2 == True:
+            if flipXVelocity2:
                 do.velocity = (-1 * do.velocity[0], do.velocity[1])
                 do.location.left_x = so.location.left_x - do.hitbox.width
             if flipYVelocity1:
@@ -131,21 +136,27 @@ def update_movementState(key, game_object, collision):
         case movementStates.STATIONARY:
             dashing = False
             if key == "up":
+                game_object.location.top_y -= 5
                 game_object.state = movementStates.JUMPING
                 game_object.changeVelocity(0, -8)
             if key == "left":
                 game_object.changeVelocity(-5,0)
+                game_object.location.left_x -= 5
             if key == "right":
                 game_object.changeVelocity(5,0)
+                game_object.location.left_x += 5
 
         case movementStates.JUMPING:
             if key == "up":
+                game_object.location.top_y -= 5
                 game_object.state = movementStates.DOUBLEJUMPING
                 game_object.changeVelocity(0,-5)
             if key == "left":
                 game_object.changeVelocity(-5,0)
+                game_object.location.left_x -= 5
             if key == "right":
                 game_object.changeVelocity(5,0)
+                game_object.location.left_x += 5
             # if game_object.location.top_y > SCREEN_HEIGHT - 20:
             #     game_object.state = movementStates.STATIONARY
             # if collision[0] == True and collision[2] == True:
@@ -209,7 +220,7 @@ def update_movementState(key, game_object, collision):
 
 def test2():
     width = 160
-    player = GameObject(location=Location(360, 300 - 10 - 2), hitbox=Hitbox(10, 10), image=None, velocity=(0, 10),color=(0,255,0), moveable = True)
+    player = GameObject(location=Location(400 - width - 20, 300 ), hitbox=Hitbox(10, 10), image=None, velocity=(0, 0),color=(0,255,0), moveable = True)
     platform = GameObject(location=Location(400 - width, 300), hitbox=Hitbox(width, 20), image=None, velocity=(0, 0),color=(0,0,255), moveable=False)
     bg1 = GameObject(location=Location(400 - 10, 300-10), hitbox=Hitbox(10,10), image=None, velocity=(-5,0),color=(255,0,0), moveable=True)
     bg2 = GameObject(location=Location(400 - 40, 300-10), hitbox=Hitbox(10,10), image=None, velocity=(0,-5),color=(255,0,100), moveable=True)
@@ -255,9 +266,9 @@ def test2():
                     if dashing == False:
                         dashing = True
                         # o1.velocity = (o1.velocity[0] * 1.5,o1.velocity[1])
-                        (dx, dy) = o1.velocity
+                        (dx, dy) = player.velocity
                         dx = -1 if dx < 0 else 1
-                        o1.move(dx * 35, dy)
+                        player.move(dx * 35, dy)
             if event.type == pygame.QUIT:
                 running = False
         def aiMove(enemy, victim):

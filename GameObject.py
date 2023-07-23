@@ -140,10 +140,14 @@ class GameObject:
         pygame.draw.rect(s, cc, r)
     def changeVelocity(self, dx, dy):
         self.velocity = (self.velocity[0] + dx, self.velocity[1] + dy)
+        if self.velocity[0] > 10:
+            self.velocity = (10, self.velocity[1])
+        if self.velocity[0] < -10:
+            self.velocity = (-10, self.velocity[1])
 
     def applyGravity(self):
         # gravity is 1/8
-        gravity = 1/8
+        gravity = 0
         if self.moveable == True:
             self.changeVelocity(0,gravity)
 # Need a image as well as a hitbox as part of the class.
