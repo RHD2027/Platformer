@@ -78,17 +78,18 @@ def update_world(screen, game_objects, key, static_objects, dynamic_objects, gam
             flipXVelocity2 = False
             flipYVelocity1 = collision == VERTICAL_COLLISION
             flipYVelocity2 = False
+            OFFSET = 2
             if flipXVelocity1:
                 if do.velocity[0] > 0:
-                    do.location.left_x = so.location.left_x - do.hitbox.width
+                    do.location.left_x = so.location.left_x - do.hitbox.width - OFFSET
                 elif do.velocity[0] < 0:
-                    do.location.left_x = so.location.left_x + so.hitbox.width
+                    do.location.left_x = so.location.left_x + so.hitbox.width + OFFSET
                 else:
                     pass
                 do.velocity = (-1 * do.velocity[0], do.velocity[1])
-            if flipXVelocity2:
-                do.velocity = (-1 * do.velocity[0], do.velocity[1])
-                do.location.left_x = so.location.left_x - do.hitbox.width
+            # if flipXVelocity2:
+            #     do.velocity = (-1 * do.velocity[0], do.velocity[1])
+            #     do.location.left_x = so.location.left_x - do.hitbox.width
             if flipYVelocity1:
                 if do.velocity[1] > 0:
                     do.location.top_y = so.location.top_y - do.hitbox.height
@@ -98,9 +99,9 @@ def update_world(screen, game_objects, key, static_objects, dynamic_objects, gam
                     pass
                 do.velocity = (do.velocity[0], -0.1 * do.velocity[1])
 
-            if flipYVelocity2:
-                do.velocity = (do.velocity[0], -1 * do.velocity[1])
-                do.location.top_y = so.location.top_y - do.hitbox.height
+            # if flipYVelocity2:
+            #     do.velocity = (do.velocity[0], -1 * do.velocity[1])
+            #     do.location.top_y = so.location.top_y - do.hitbox.height
             if do not in game_enemies:
                 update_movementState(key, do, collision)
 

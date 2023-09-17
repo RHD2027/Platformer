@@ -140,10 +140,10 @@ class GameObject:
         pygame.draw.rect(s, cc, r)
     def changeVelocity(self, dx, dy):
         self.velocity = (self.velocity[0] + dx, self.velocity[1] + dy)
-        if self.velocity[0] > 10:
-            self.velocity = (10, self.velocity[1])
-        if self.velocity[0] < -10:
-            self.velocity = (-10, self.velocity[1])
+        if self.velocity[0] > 8:
+            self.velocity = (8, self.velocity[1])
+        if self.velocity[0] < -8:
+            self.velocity = (-8, self.velocity[1])
 
     def applyGravity(self):
         # gravity is 1/8
