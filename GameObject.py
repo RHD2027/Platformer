@@ -1,24 +1,39 @@
 import time
 import copy
 import pygame
+from Location import *
+from Hitbox import *
+SUBPIXELS_PER_PIXEL = 10
 from movementStates import movementStates
 circle_color = (0,255 , 10)
 def in_range(value, lower_limit, upper_limit):
     return lower_limit <= value <= upper_limit
+
+def toPixels(value_subpixels):
+    return value_subpixels / SUBPIXELS_PER_PIXEL
+
+def toSubPixels(value_pixels):
+    return value_pixels * SUBPIXELS_PER_PIXEL
+
+
 class GameObject:
 
     def __init__(self, location, hitbox, image, velocity, color, moveable):
 # Hitbox should track X and Y coordinates as well as height and width.
 # Hitbox is for the computer to track the object, the image is for the human playing to see that it is there.
-        self.location = location
-        self.hitbox = hitbox
+        self.location = Location(toSubPixels(location.left_x), toSubPixels(location.top_y)) # in subpixels
+        self.hitbox = Hitbox(toSubPixels(hitbox.width), toSubPixels(hitbox.height)) # in subpixels
         self.image = image
-        self.velocity = velocity
+        self.velocity = velocity # in subpixels
         self.color = color
         self.moveable = moveable
         self.state = movementStates.STATIONARY
-        self.prevlocation = location
+        self.prevlocation = self.location # in subpixels
+
+        #dx and dy are in subpixels
+
     def move(self, dx, dy):
+
         self.prevlocation = copy.deepcopy(self.location)
         (x,y) = (self.location.left_x, self.location.top_y)
         # (dx, dy) = self.velocity
@@ -28,35 +43,42 @@ class GameObject:
     def inRange(self, value, lowerLimit, upperLimit):
         return lowerLimit <= value and value <= upperLimit
 
-    def collidesWith(self, other):
-        object1BottomY = self.location.top_y + self.hitbox.height
-        object2BottomY = other.location.top_y + other.hitbox.height
-        object1RightX = self.location.left_x + self.hitbox.width
-        object2RightX = other.location.left_x + other.hitbox.width
 
-        left_in_range = in_range(self.location.left_x, other.location.left_x, object2RightX)
-        right_in_range = in_range(object1RightX, other.location.left_x, object2RightX)
+
+    def collidesWith(self, other):
+        object1TopY = (self.location.top_y)
+        object1BottomY = object1TopY + self.hitbox.height
+        object1LeftX = (self.location.left_x)
+        object1RightX = object1LeftX + self.hitbox.width
+
+        object2TopY = (other.location.top_y)
+        object2BottomY = object2TopY + other.hitbox.height
+        object2LeftX = (other.location.left_x)
+        object2RightX = object2LeftX + other.hitbox.width
+
+        left_in_range = in_range(object1LeftX, object2LeftX, object2RightX)
+        right_in_range = in_range(object1RightX, object2LeftX, object2RightX)
 
         x_overlap = 0
         if (not left_in_range and not right_in_range):
             x_overlap = 0
         elif (not left_in_range and right_in_range):
-            x_overlap = object1RightX - other.location.left_x
+            x_overlap = object1RightX - object2LeftX
         elif (left_in_range and not right_in_range):
-            x_overlap = object2RightX - self.location.left_x
+            x_overlap = object2RightX - object1LeftX
         else:
             x_overlap = self.hitbox.width
 
-        top_in_range = in_range(self.location.top_y, other.location.top_y, object2BottomY)
-        bottom_in_range = in_range(object1BottomY, other.location.top_y, object2BottomY)
+        top_in_range = in_range(object1TopY, object2TopY, object2BottomY)
+        bottom_in_range = in_range(object1BottomY, object2TopY, object2BottomY)
 
         y_overlap = 0
         if (not top_in_range and not bottom_in_range):
             y_overlap = 0
         elif (not top_in_range and bottom_in_range):
-            y_overlap = abs(object1BottomY - other.location.top_y)
+            y_overlap = abs(object1BottomY - object2TopY)
         elif (top_in_range and not bottom_in_range):
-            y_overlap = abs(object2BottomY - self.location.top_y)
+            y_overlap = abs(object2BottomY - object1TopY)
         else:
             y_overlap = self.hitbox.height
 
@@ -136,17 +158,19 @@ class GameObject:
         s = screen
         cc = self.color
         l = self.location
-        r = pygame.Rect(l.left_x, l.top_y, self.hitbox.width, self.hitbox.height)
+        r = pygame.Rect(toPixels(l.left_x), toPixels(l.top_y), toPixels(self.hitbox.width), toPixels(self.hitbox.height))
         pygame.draw.rect(s, cc, r)
     def changeVelocity(self, dx, dy):
+        MAXVELOCITY = 40
         self.velocity = (self.velocity[0] + dx, self.velocity[1] + dy)
-        if self.velocity[0] > 8:
-            self.velocity = (8, self.velocity[1])
-        if self.velocity[0] < -8:
-            self.velocity = (-8, self.velocity[1])
+        if self.velocity[0] > MAXVELOCITY:
+            self.velocity = (MAXVELOCITY, self.velocity[1])
+        if self.velocity[0] < -MAXVELOCITY:
+            self.velocity = (-MAXVELOCITY, self.velocity[1])
 
     def applyGravity(self):
         # gravity is 1/8
+        gravity = SUBPIXELS_PER_PIXEL / 8
         gravity = 0
         if self.moveable == True:
             self.changeVelocity(0,gravity)

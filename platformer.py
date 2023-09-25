@@ -1,12 +1,16 @@
 import time
 import pygame
 from GameObject import *
+from Location import *
+from Hitbox import *
 import sdl2
 import sdl2.ext
 pygame.init()
 # Set up the drawing window
-SCREEN_WIDTH = 500
-SCREEN_HEIGHT = 500
+SCREEN_WIDTH = 500 # pixels
+SCREEN_HEIGHT = 500 # pixels
+SCREEN_WIDTH_SUBPIXELS = toSubPixels(SCREEN_WIDTH)
+SCREEN_HEIGHT_SUBPIXELS = toSubPixels(SCREEN_HEIGHT)
 dashing = False
 screen = pygame.display.set_mode([SCREEN_WIDTH, SCREEN_HEIGHT])
 circle_position = (50, 400)
@@ -15,16 +19,9 @@ refresh_rate = 60
 frame_time = 1/refresh_rate
 enemyMovementCounter = 0
 
-yVelocity = -10
-xVelocity = 2
-class Location:
-    def __init__(self, left_x, top_y):
-        self.left_x = left_x
-        self.top_y = top_y
-class Hitbox:
-    def __init__(self, width, height):
-        self.width = width
-        self.height = height
+
+
+
 
 
 # Run until the user asks to quit
@@ -49,17 +46,17 @@ def update_world(screen, game_objects, key, static_objects, dynamic_objects, gam
     # o2 = game_objects[1]
     # badGuy = game_objects[2]
     def keepInBounds(o1, screen_width, screen_height):
-        if o1.location.top_y + o1.hitbox.height >= (SCREEN_HEIGHT):
+        if o1.location.top_y + toSubPixels(o1.hitbox.height) >= (SCREEN_HEIGHT_SUBPIXELS):
             yvel = o1.velocity[1] * -0.1
             xvel = o1.velocity[0] * 0.95
             if yvel >= -1 and yvel <= 1:
                 yvel = 0
 
             o1.velocity = (xvel, yvel)
-            o1.location.top_y = SCREEN_HEIGHT - o1.hitbox.height
-        if o1.location.left_x >= (SCREEN_WIDTH - o1.hitbox.width):
+            o1.location.top_y = SCREEN_HEIGHT_SUBPIXELS - o1.hitbox.height
+        if o1.location.left_x >= (SCREEN_WIDTH_SUBPIXELS - o1.hitbox.width):
             o1.velocity = (-0.75 * o1.velocity[0], o1.velocity[1])
-            o1.location.left_x = SCREEN_WIDTH - o1.hitbox.width
+            o1.location.left_x = SCREEN_WIDTH_SUBPIXELS - o1.hitbox.width
         if o1.location.left_x <= (0 + o1.hitbox.width):
             o1.velocity = (-0.75 * o1.velocity[0], o1.velocity[1])
             o1.location.left_x = o1.hitbox.width
@@ -78,7 +75,7 @@ def update_world(screen, game_objects, key, static_objects, dynamic_objects, gam
             flipXVelocity2 = False
             flipYVelocity1 = collision == VERTICAL_COLLISION
             flipYVelocity2 = False
-            OFFSET = 2
+            OFFSET = toSubPixels(2)
             if flipXVelocity1:
                 if do.velocity[0] > 0:
                     do.location.left_x = so.location.left_x - do.hitbox.width - OFFSET
@@ -146,6 +143,8 @@ def update_movementState(key, game_object, collision):
             if key == "right":
                 game_object.changeVelocity(5,0)
                 game_object.location.left_x += 5
+            if key == "down":
+                game_object.changeVelocity(0,5)
 
         case movementStates.JUMPING:
             if key == "up":
@@ -158,6 +157,8 @@ def update_movementState(key, game_object, collision):
             if key == "right":
                 game_object.changeVelocity(5,0)
                 game_object.location.left_x += 5
+            if key == "down":
+                game_object.changeVelocity(0,5)
             # if game_object.location.top_y > SCREEN_HEIGHT - 20:
             #     game_object.state = movementStates.STATIONARY
             # if collision[0] == True and collision[2] == True:
@@ -167,7 +168,7 @@ def update_movementState(key, game_object, collision):
             if key == "up":
                 pass
             if key == "down":
-                pass
+                game_object.changeVelocity(0,5)
             if key == "left":
                 game_object.changeVelocity(-5,0)
             if key == "right":
@@ -202,6 +203,7 @@ def update_movementState(key, game_object, collision):
 #                 estate = movementStates.EDOUBLEJUMPING
 #                 game_object.changeVelocity(0,-0.5)
 #             if key == "left":
+
 #                 game_object.changeVelocity(-1,0)
 #             if key == "right":
 #                 game_object.changeVelocity(1,0)
