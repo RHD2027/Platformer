@@ -8,6 +8,12 @@ from movementStates import movementStates
 circle_color = (0,255 , 10)
 def in_range(value, lower_limit, upper_limit):
     return lower_limit <= value <= upper_limit
+def clamp(value, lower_limit, upper_limit):
+    if value > upper_limit:
+        return upper_limit
+    elif value < lower_limit:
+        return lower_limit
+    else: return value
 
 def toPixels(value_subpixels):
     return value_subpixels / SUBPIXELS_PER_PIXEL
@@ -162,16 +168,16 @@ class GameObject:
         pygame.draw.rect(s, cc, r)
     def changeVelocity(self, dx, dy):
         MAXVELOCITY = 40
-        self.velocity = (self.velocity[0] + dx, self.velocity[1] + dy)
-        if self.velocity[0] > MAXVELOCITY:
-            self.velocity = (MAXVELOCITY, self.velocity[1])
-        if self.velocity[0] < -MAXVELOCITY:
-            self.velocity = (-MAXVELOCITY, self.velocity[1])
+        newXvel = clamp(self.velocity[0] + dx,-MAXVELOCITY, MAXVELOCITY)
+        newYvel = clamp(self.velocity[1] + dy, -MAXVELOCITY, MAXVELOCITY)
+        self.velocity = (newXvel, newYvel)
+
+
 
     def applyGravity(self):
         # gravity is 1/8
         gravity = SUBPIXELS_PER_PIXEL / 8
-        gravity = 0
+        # gravity = 0
         if self.moveable == True:
             self.changeVelocity(0,gravity)
 # Need a image as well as a hitbox as part of the class.
