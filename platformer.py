@@ -66,6 +66,10 @@ def update_world(screen, game_objects, key, static_objects, dynamic_objects, gam
 
             do.velocity = (do.velocity[0], -1 * do.velocity[1])
     #(CollisionDetected, TopCollision, BottomCollision, LeftCollision, RightCollision)
+    for go in game_objects:
+        go.applyGravity()
+        (dx, dy) = go.velocity
+        go.move(dx, dy)
     for do in dynamic_objects:
         for so in static_objects:
             NO_COLLISION = 0
@@ -76,10 +80,11 @@ def update_world(screen, game_objects, key, static_objects, dynamic_objects, gam
             flipXVelocity2 = False
             flipYVelocity1 = collision == VERTICAL_COLLISION
             flipYVelocity2 = False
-            OFFSET = toSubPixels(2)
+            OFFSET = toSubPixels(0)
             if flipXVelocity1:
                 if do.velocity[0] > 0:
                     do.location.left_x = so.location.left_x - do.hitbox.width - OFFSET
+                    # not_player.left_x = not_player.left_x - OFFSET
                 elif do.velocity[0] < 0:
                     do.location.left_x = so.location.left_x + so.hitbox.width + OFFSET
                 else:
@@ -96,6 +101,7 @@ def update_world(screen, game_objects, key, static_objects, dynamic_objects, gam
                 else:
                     pass
                 do.velocity = (do.velocity[0], -0.1 * do.velocity[1])
+                do.velocity = (do.velocity[0], 0)
 
             # if flipYVelocity2:
             #     do.velocity = (do.velocity[0], -1 * do.velocity[1])
@@ -109,12 +115,8 @@ def update_world(screen, game_objects, key, static_objects, dynamic_objects, gam
     # badGuy.velocity = (badGuy.velocity[0], badGuy.velocity[1] + gravity)
     # (dx, dy) = badGuy.velocity
     # badGuy.move(dx, dy)
-    for go in game_objects:
-        go.applyGravity()
-        (dx, dy) = go.velocity
-        go.move(dx, dy)
-        if go.moveable:
-            keepInBounds(go, SCREEN_WIDTH, SCREEN_HEIGHT)
+
+
 
 
     # --------------------------------
@@ -231,7 +233,7 @@ def test2():
     bg1 = GameObject(location=Location(400 - 10, 300-10), hitbox=Hitbox(10,10), image=None, velocity=(-5,0),color=(255,0,0), moveable=True)
     bg2 = GameObject(location=Location(400 - 40, 300-10), hitbox=Hitbox(10,10), image=None, velocity=(0,-5),color=(255,0,100), moveable=True)
     bg3 = GameObject(location=Location(400 - 80, 300-10), hitbox=Hitbox(10,10), image=None, velocity=(5,0),color=(255,50,0), moveable=True)
-    ground = GameObject(location=Location(0, SCREEN_HEIGHT - 20), hitbox=Hitbox(SCREEN_WIDTH, 20), image=None, velocity=(0, 0),color=(86, 173, 85), moveable=False)
+    ground = GameObject(location=Location(-1000, SCREEN_HEIGHT - 20), hitbox=Hitbox(SCREEN_WIDTH * 100, 400), image=None, velocity=(0, 0),color=(86, 173, 85), moveable=False)
 
     dynamic_objects = [player, bg1, bg2, bg3]
     static_objects = [platform, ground, platform2]
@@ -244,8 +246,6 @@ def test2():
 
     running = True
     while running:
-        for no in not_player:
-            no.move(-player.velocity[0], -player.velocity[1])
         player.location.left_x = CENTERPOINT[0]
         player.location.top_y = CENTERPOINT[1]
         print(player.state)
@@ -303,6 +303,8 @@ def test2():
             enemyMovementCounter = 0
 
         update_world(screen, game_objects, key, static_objects, dynamic_objects, game_enemies)
+        for no in not_player:
+            no.move(-player.velocity[0], -player.velocity[1])
         update_screen(screen, game_objects)
         time.sleep(frame_time)
 
