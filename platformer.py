@@ -11,6 +11,7 @@ SCREEN_WIDTH = 500 # pixels
 SCREEN_HEIGHT = 500 # pixels
 SCREEN_WIDTH_SUBPIXELS = toSubPixels(SCREEN_WIDTH)
 SCREEN_HEIGHT_SUBPIXELS = toSubPixels(SCREEN_HEIGHT)
+CENTERPOINT = (SCREEN_HEIGHT_SUBPIXELS / 2, SCREEN_WIDTH_SUBPIXELS / 2)
 dashing = False
 screen = pygame.display.set_mode([SCREEN_WIDTH, SCREEN_HEIGHT])
 circle_position = (50, 400)
@@ -134,30 +135,30 @@ def update_movementState(key, game_object, collision):
         case movementStates.STATIONARY:
             dashing = False
             if key == "up":
-                game_object.location.top_y -= 30
+                # game_object.location.top_y -= 30
                 game_object.state = movementStates.JUMPING
                 game_object.changeVelocity(0, -15)
             if key == "left":
                 game_object.changeVelocity(-30,0)
-                game_object.location.left_x -= 30
+                # game_object.location.left_x -= 30
             if key == "right":
                 game_object.changeVelocity(30,0)
-                game_object.location.left_x += 30
+                # game_object.location.left_x += 30
             if key == "down":
                 game_object.changeVelocity(0,30)
 
         case movementStates.JUMPING:
             if key == "up":
-                game_object.location.top_y -= 50
+                # game_object.location.top_y -= 50
                 game_object.state = movementStates.STATIONARY
                 # game_object.state = movementStates.DOUBLEJUMPING
                 game_object.changeVelocity(0,-50)
             if key == "left":
                 game_object.changeVelocity(-50,0)
-                game_object.location.left_x -= 50
+                # game_object.location.left_x -= 50
             if key == "right":
                 game_object.changeVelocity(50,0)
-                game_object.location.left_x += 50
+                # game_object.location.left_x += 50
             if key == "down":
                 game_object.changeVelocity(0,50)
             # if game_object.location.top_y > SCREEN_HEIGHT - 20:
@@ -238,10 +239,15 @@ def test2():
     # static_objects = [platform]
     game_objects = dynamic_objects + static_objects
     game_enemies = [bg1, bg2, bg3]
+    not_player = dynamic_objects + static_objects
+    not_player.remove(player)
 
     running = True
     while running:
-
+        for no in not_player:
+            no.move(-player.velocity[0], -player.velocity[1])
+        player.location.left_x = CENTERPOINT[0]
+        player.location.top_y = CENTERPOINT[1]
         print(player.state)
         print(f"{player.prevlocation.left_x}, {player.prevlocation.top_y}, {player.location.left_x}, {player.location.top_y}")
         key = "none"
