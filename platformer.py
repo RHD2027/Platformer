@@ -255,6 +255,21 @@ def test2():
     game_enemies = [bg1, bg2, bg3]
     not_player = dynamic_objects + static_objects + clouds
     not_player.remove(player)
+    not_player_chunk = []
+    STARTWIDTH = 0
+    ENDWIDTH = SCREEN_WIDTH_SUBPIXELS
+    for i in range(0, 10):
+        itemsInChunk = []
+        for n in not_player:
+            if n.inRange(n.location.left_x, STARTWIDTH, ENDWIDTH):
+                itemsInChunk.append(n)
+        STARTWIDTH += SCREEN_WIDTH_SUBPIXELS
+        ENDWIDTH += SCREEN_WIDTH_SUBPIXELS
+        not_player_chunk.append(itemsInChunk)
+
+
+
+
 
     running = True
     while running:
@@ -315,7 +330,7 @@ def test2():
             enemyMovementCounter = 0
 
         update_world(screen, game_objects, key, static_objects, dynamic_objects, game_enemies)
-        for no in not_player:
+        for no in not_player_chunk[0]:
             no.move(-player.velocity[0], -player.velocity[1])
         update_screen(screen, game_objects, clouds)
         time.sleep(frame_time)
