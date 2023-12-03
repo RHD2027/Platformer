@@ -1,9 +1,11 @@
 import time
 import pygame
 from GameObject import *
+from Background import *
 from Location import *
 from Hitbox import *
 import random
+
 import sdl2
 import sdl2.ext
 pygame.init()
@@ -21,7 +23,7 @@ refresh_rate = 60
 frame_time = 1/refresh_rate
 enemyMovementCounter = 0
 
-
+sky = background(SCREEN_WIDTH, SCREEN_HEIGHT, "cloudysky.jpeg", screen)
 
 
 
@@ -122,14 +124,13 @@ def update_world(screen, game_objects, key, static_objects, dynamic_objects, gam
 
     # --------------------------------
 
-def update_screen(screen, game_objects, clouds):
-    # Fill the background with sky
-    screen.fill((80, 153, 217))
+def update_screen(screen, game_objects, playerxvelocity):
+    sky.drawBackground(-playerxvelocity / 10)
     for go in game_objects:
         go.draw(screen)
-    for c in clouds:
-        if in_range(c.location.left_x, 0, SCREEN_WIDTH_SUBPIXELS) and in_range(c.location.top_y, 0, SCREEN_HEIGHT_SUBPIXELS):
-            c.draw(screen)
+    # for c in clouds:
+    #     if in_range(c.location.left_x, 0, SCREEN_WIDTH_SUBPIXELS) and in_range(c.location.top_y, 0, SCREEN_HEIGHT_SUBPIXELS):
+    #         c.draw(screen)
     pygame.display.flip()
 
 from movementStates import movementStates
@@ -238,22 +239,22 @@ def test2():
     bg2 = GameObject(location=Location(400 - 40, 300-10), hitbox=Hitbox(10,10), image=None, velocity=(0,-5),color=(255,0,100), moveable=True)
     bg3 = GameObject(location=Location(400 - 80, 300-10), hitbox=Hitbox(10,10), image=None, velocity=(5,0),color=(255,50,0), moveable=True)
     ground = GameObject(location=Location(-1000, SCREEN_HEIGHT - 20), hitbox=Hitbox(SCREEN_WIDTH * 10, 400), image=None, velocity=(0, 0),color=(86, 173, 85), moveable=False)
-    clouds = []
-    cloudXOffset = 0
-    cloudYOffset = 0
-    minimum_cloud_spacing = 100
-    for i in range(0, 1000):
-        cloudXOffset = (minimum_cloud_spacing * i) + random.randrange(0, minimum_cloud_spacing / 2)
-        cloudYOffset = random.randrange(-50, 50)
-        cloud = GameObject(location=Location(200 + cloudXOffset, 200 + cloudYOffset), hitbox=Hitbox(70, 10), image=None, velocity=(0,0),color=(255,255,255), moveable = False)
-        clouds.append(cloud)
+    # clouds = []
+    # cloudXOffset = 0
+    # cloudYOffset = 0
+    # minimum_cloud_spacing = 100
+    # for i in range(0, 1000):
+    #     cloudXOffset = (minimum_cloud_spacing * i) + random.randrange(0, minimum_cloud_spacing / 2)
+    #     cloudYOffset = random.randrange(-50, 50)
+    #     cloud = GameObject(location=Location(200 + cloudXOffset, 200 + cloudYOffset), hitbox=Hitbox(70, 10), image=None, velocity=(0,0),color=(255,255,255), moveable = False)
+    #     clouds.append(cloud)
     dynamic_objects = [player, bg1, bg2, bg3]
     static_objects = [platform, ground, platform2]
     # dynamic_objects = [player]
     # static_objects = [platform]
     game_objects = dynamic_objects + static_objects
     game_enemies = [bg1, bg2, bg3]
-    not_player = dynamic_objects + static_objects + clouds
+    not_player = dynamic_objects + static_objects# + clouds
     not_player.remove(player)
     not_player_chunk = []
     STARTWIDTH = 0
@@ -332,7 +333,7 @@ def test2():
         update_world(screen, game_objects, key, static_objects, dynamic_objects, game_enemies)
         for no in not_player_chunk[0]:
             no.move(-player.velocity[0], -player.velocity[1])
-        update_screen(screen, game_objects, clouds)
+        update_screen(screen, game_objects, player.velocity[0])
         time.sleep(frame_time)
 
     # Done! Time to quit.
