@@ -260,7 +260,7 @@ def test2():
     STARTWIDTH = 0
     ENDWIDTH = SCREEN_WIDTH_SUBPIXELS
     for i in range(0, 10):
-        itemsInChunk = []
+        itemsInChunk = [ground]
         for n in not_player:
             if n.inRange(n.location.left_x, STARTWIDTH, ENDWIDTH):
                 itemsInChunk.append(n)
@@ -277,7 +277,7 @@ def test2():
         player.location.left_x = CENTERPOINT[0]
         player.location.top_y = CENTERPOINT[1]
         print(player.state)
-        print(f"{player.prevlocation.left_x}, {player.prevlocation.top_y}, {player.location.left_x}, {player.location.top_y}")
+        # print(f"{player.prevlocation.left_x}, {player.prevlocation.top_y}, {player.location.left_x}, {player.location.top_y}")
         key = "none"
         #	current_time = time.getTime
         # Did the user click the window close button?

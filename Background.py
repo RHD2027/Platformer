@@ -11,10 +11,20 @@ class background:
 		self.screen = screen
 		self.tiles = math.ceil(width / self.bg.get_width()) + 1
 	def drawBackground(self, scrollAmount):
+
 		i = 0
-		while (i < self.tiles):
+		while (-self.tiles < i < self.tiles):
 			self.screen.blit(self.bg, (self.bg.get_width() * i + self.scroll, 0))
-			i += 1
+			if scrollAmount <= 0:
+				self.screen.blit(self.bg, (self.bg.get_width() * (i - 1) + self.scroll, 0))
+				i += 1
+			else:
+				self.screen.blit(self.bg, (self.bg.get_width() * (i + 1) + self.scroll, 0))
+				i -= 1
+
+
+
+
 		# FRAME FOR SCROLLING
 		self.scroll += scrollAmount
 
