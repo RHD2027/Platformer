@@ -1,9 +1,11 @@
 import time
 import pygame
 from GameObject import *
+from gameStates import *
 from Background import *
 from Location import *
 from Hitbox import *
+
 import random
 
 import sdl2
@@ -23,7 +25,7 @@ refresh_rate = 60
 frame_time = 1/refresh_rate
 enemyMovementCounter = 0
 
-sky = background(SCREEN_WIDTH, SCREEN_HEIGHT, "cloudysky.jpeg", screen)
+sky = background(SCREEN_WIDTH, SCREEN_HEIGHT, "Cloudysky.jpeg", screen)
 
 
 
@@ -103,7 +105,7 @@ def update_world(screen, game_objects, key, static_objects, dynamic_objects, gam
                     do.location.top_y = so.location.top_y + so.hitbox.height
                 else:
                     pass
-                do.velocity = (do.velocity[0], -0.1 * do.velocity[1])
+                do.velocity = (do.velocity[0] * 0.95, -0.1 * do.velocity[1])
                 do.velocity = (do.velocity[0], 0)
 
             # if flipYVelocity2:
@@ -124,8 +126,8 @@ def update_world(screen, game_objects, key, static_objects, dynamic_objects, gam
 
     # --------------------------------
 
-def update_screen(screen, game_objects, playerxvelocity):
-    sky.drawBackground(-playerxvelocity / 10)
+def update_screen(screen, game_objects, playerxvelocity, playeryvelocity):
+    sky.drawBackground(-playerxvelocity / 30, -playeryvelocity / 60)
     for go in game_objects:
         go.draw(screen)
     # for c in clouds:
@@ -274,6 +276,15 @@ def test2():
 
     running = True
     while running:
+
+        # match State:
+        #     case gameStates.GAMESTART:
+        #         if key == "space"
+        #             State = gameStates.GAMEPLAY
+        #     case gameStates.GAMEPLAY:
+
+
+
         player.location.left_x = CENTERPOINT[0]
         player.location.top_y = CENTERPOINT[1]
         print(player.state)
@@ -310,6 +321,7 @@ def test2():
                         player.move(dx * 35, dy)
             if event.type == pygame.QUIT:
                 running = False
+                pygame.quit()
         def aiMove(enemy, victim):
             key = ""
             if enemy.location.left_x < victim.location.left_x - 20:
@@ -329,15 +341,13 @@ def test2():
             for enemy in game_enemies:
                     aiMove(enemy,player)
             enemyMovementCounter = 0
-
         update_world(screen, game_objects, key, static_objects, dynamic_objects, game_enemies)
         for no in not_player_chunk[0]:
             no.move(-player.velocity[0], -player.velocity[1])
-        update_screen(screen, game_objects, player.velocity[0])
+        update_screen(screen, game_objects, player.velocity[0], player.velocity[1])
         time.sleep(frame_time)
 
     # Done! Time to quit.
-    pygame.quit()
 
 test2()
 #test()
